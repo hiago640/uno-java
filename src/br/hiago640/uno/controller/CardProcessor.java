@@ -1,6 +1,7 @@
 package br.hiago640.uno.controller;
 
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 import br.hiago640.uno.model.Card;
@@ -22,27 +23,33 @@ public class CardProcessor {
 			// Number cards
 			int value = 0;
 			for (int i = 0; i < 19; i++) {
-				value = ((i % 2 == 0) ? i : (1 + i)) / 2;
+//				value = ((i % 2 == 0) ? i : (1 + i)) / 2;
+				
+				value = ((i % 2) + i) / 2;
 
 				cardList.add(new Card(String.valueOf(value), color, CardType.NUMBER));
 			}
 
 			// Action Cards
 			for (CardType type : CardType.getActionCardsType())
-				for(int i = 0; i < 2; i ++)
+				for (int i = 0; i < 2; i++)
 					cardList.add(new Card(type.getValue(), color, type));
-			
+
 			// Action Cards
 			for (CardType type : CardType.getWildCardsType())
 				cardList.add(new Card(type.getValue(), null, type));
 
 		}
+
 		return cardList;
 	}
 
-	public Card getLastCardDeck() {
-
-		return null;
+	public static Card getLastCardDeck(Deque<Card> discardedDeck) {
+		return discardedDeck.peek();
 	}
 
+	
+	public static void discardedCards(Card card, Deque<Card> discardedCard) {
+		discardedCard.push(card);
+	}
 }
