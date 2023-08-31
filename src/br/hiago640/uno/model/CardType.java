@@ -33,4 +33,8 @@ public enum CardType {
 	public static List<CardType> getWildCardsType() {
 		return Arrays.asList(WILD_CARD, WILD_DRAW_FOUR_CARD);
 	}
+	
+	public static List<CardType> getCardsNotNumberType() {
+		return Arrays.asList(DRAW_TWO_CARD, REVERSE_CARD, SKIP_CARD,WILD_CARD, WILD_DRAW_FOUR_CARD);
+	}
 }

@@ -12,6 +12,7 @@ public class Player {
 	private String name;
 	private List<Card> cards = new ArrayList<>();
 	private boolean isUno;
+	private boolean isSkipped;
 
 	public Player(String name) {
 		this.name = name;
@@ -41,14 +42,26 @@ public class Player {
 		this.isUno = isUno;
 	}
 
+	public boolean isSkipped() {
+		return isSkipped;
+	}
+
+	public void setSkipped(boolean isSkipped) {
+		this.isSkipped = isSkipped;
+	}
+
 	@Override
 	public String toString() {
 		return String.format("Player [name=%s]", name);
 	}
 
 	public void showPlayerHand() {
-		PlayerProcessor.showPlayerHand(this);
-		
+		System.out.println("==========================================================");
+		cards.stream().forEach(e -> {
+			String msg = String.format("%s - %s", cards.indexOf(e) + 1, e);
+			System.out.println(msg);
+		});
+		System.out.println("==========================================================");
 	}
-	
+
 }

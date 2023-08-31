@@ -2,15 +2,14 @@ package br.hiago640.uno.controller;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Set;
 
 import br.hiago640.uno.model.Card;
+import br.hiago640.uno.model.CardColor;
 import br.hiago640.uno.model.CardType;
 import br.hiago640.uno.model.Player;
 
@@ -20,66 +19,87 @@ public class GameProcessor {
 
 	private List<Card> cards;
 	private Deque<Card> discardedCards = new ArrayDeque<>();
-	private Set<Player> players = new LinkedHashSet<>();
-	private boolean isFinished;
+	private LinkedList<Player> players = new LinkedList<>();
 
-	public GameProcessor() throws Exception {
-
+	public GameProcessor() {
 		createDeckCards();
 		createPlayers();
-
 		dealCards();
 
-		initGame();
+		initTurn();
+	}
 
-		System.out.println("Cartas no baralho para comprar: " + cards.size());
-		System.out.println("Cartas descartadas: " + discardedCards.size());
-
-		List<Player> playersList = new ArrayList<>();
-		playersList.addAll(players);
-		Card chosenCard = null;
+	private void initTurn() {
+		
+		boolean isFinished;
 		do {
-			System.out.println("Turns: " + playersList);
 
-			for (Player player : playersList) {
-				System.out.println(CardProcessor.getLastCardDeck(discardedCards));
+			System.out.println("Turns: " + players);
 
-				System.out.println("Your turn: " + player.getName());
+			for (Player player : players) {
+				if (player.isSkipped()) {
+					System.out.println("Your turn: " + player.getName());
+					System.out.println("Your turn is Skipped!");
+					player.setSkipped(false);
+					break;
+				}
 
-				do {
-					player.showPlayerHand();
-					System.out.print("\nChoose a Card to throw (index): ");
-
-					int indexCard = Integer.parseInt(scan.nextLine()) - 1;
-					chosenCard = player.getCards().get(indexCard);
-
-				} while (!validCard(chosenCard));
-
-				PlayerProcessor.discardedCards(chosenCard, discardedCards);
-				
-				System.out.println("Fim de jogada");
+				System.out.println("\n\n==========================================================");
+				makePlay(player);
 			}
 
-//			Collections.reverse(playersList);
+			isFinished = players.stream().anyMatch(p -> p.getCards().isEmpty());
 
-//			isFinished = true;
 		} while (!isFinished);
 
+	}
+
+	private void makePlay(Player player) {
+		Card chosenCard = null;
+
+		Card lastCard = CardProcessor.getLastCardDeck(discardedCards);
+		System.out.println("Your turn: " + player.getName());
+		System.out.println("Last Card played: " + lastCard);
+
+		do {
+			player.showPlayerHand();
+			System.out.print("\nChoose a Card to throw (index): ");
+
+			int indexCard = Integer.parseInt(scan.nextLine()) - 1;
+			chosenCard = player.getCards().get(indexCard);
+
+		} while (!validCard(chosenCard));
+
+		player.getCards().remove(chosenCard);
+		PlayerProcessor.discardedCards(chosenCard, discardedCards);
+
+		if(!CardType.NUMBER.equals(chosenCard.getType()))
+			cardTypeActions(player, chosenCard);
+		
+	}
+
+	private void cardTypeActions(Player player, Card chosenCard) {
+		if (CardType.SKIP_CARD.equals(chosenCard.getType())) {
+			int idxCurrentPlayer = players.indexOf(player);
+			int idxNextPlayer = (idxCurrentPlayer + 1 > players.size()) ? 0 : idxCurrentPlayer + 1;
+
+			players.get(idxNextPlayer).setSkipped(true);
+		}
 	}
 
 	private boolean validCard(Card chosenCard) {
 		Card lastCardDeck = CardProcessor.getLastCardDeck(discardedCards);
 
 		boolean isSameValues = lastCardDeck.getValue().equals(chosenCard.getValue());
-		boolean isSameColors = lastCardDeck.getColor().equals(chosenCard.getColor());
+		boolean isSameColors = false;
+		boolean isWildCards = CardType.getCardsNotNumberType().contains(chosenCard.getType());
+		boolean lastCardDeckIsWildCard = CardType.getWildCardsType().contains(lastCardDeck.getType());
 
-		return (isSameValues || isSameColors);
-	}
+		if (!isWildCards || !lastCardDeckIsWildCard) {
+			isSameColors = lastCardDeck.getColor().equals(chosenCard.getColor());
+		}
 
-	private void initGame() throws InterruptedException {
-		Thread.sleep(2000);
-		System.out.println("\nDealing Cards ...");
-
+		return (isSameValues || isSameColors || isWildCards);
 	}
 
 	private void dealCards() {
@@ -87,12 +107,9 @@ public class GameProcessor {
 			PlayerProcessor.drawCards(player, cards, 7);
 
 		// show a first card
-		Card card = null;
 		do {
-			card = cards.remove(0);
-
-			moveToDiscardedCards(card, discardedCards);
-		} while (!card.getType().equals(CardType.NUMBER));
+			moveToDiscardedCards(cards.remove(0), discardedCards);
+		} while (!discardedCards.getLast().getType().equals(CardType.NUMBER));
 
 	}
 
@@ -115,7 +132,7 @@ public class GameProcessor {
 		}
 	}
 
-	public static void moveToDiscardedCards(Card card, Collection<Card> discardedCard) {
+	public static void moveToDiscardedCards(Card card, Deque<Card> discardedCard) {
 		discardedCard.add(card);
 	}
 

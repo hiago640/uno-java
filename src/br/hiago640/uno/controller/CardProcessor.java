@@ -35,7 +35,7 @@ public class CardProcessor {
 				for (int i = 0; i < 2; i++)
 					cardList.add(new Card(type.getValue(), color, type));
 
-			// Action Cards
+			// Wild Cards
 			for (CardType type : CardType.getWildCardsType())
 				cardList.add(new Card(type.getValue(), null, type));
 
