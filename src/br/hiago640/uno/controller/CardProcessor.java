@@ -3,6 +3,7 @@ package br.hiago640.uno.controller;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Stack;
 
 import br.hiago640.uno.model.Card;
 import br.hiago640.uno.model.CardColor;
@@ -45,6 +46,10 @@ public class CardProcessor {
 	}
 
 	public static Card getLastCardDeck(Deque<Card> discardedDeck) {
+		return discardedDeck.peek();
+	}
+	
+	public static Card getLastCardStackDeck(Stack<Card> discardedDeck) {
 		return discardedDeck.peek();
 	}
 

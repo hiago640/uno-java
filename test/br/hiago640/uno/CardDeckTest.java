@@ -12,7 +12,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.OrderWith;
 
 import br.hiago640.uno.controller.CardProcessor;
 import br.hiago640.uno.controller.PlayerProcessor;

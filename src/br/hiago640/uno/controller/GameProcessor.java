@@ -1,7 +1,6 @@
 package br.hiago640.uno.controller;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -9,7 +8,6 @@ import java.util.List;
 import java.util.Scanner;
 
 import br.hiago640.uno.model.Card;
-import br.hiago640.uno.model.CardColor;
 import br.hiago640.uno.model.CardType;
 import br.hiago640.uno.model.Player;
 
@@ -30,7 +28,7 @@ public class GameProcessor {
 	}
 
 	private void initTurn() {
-		
+
 		boolean isFinished;
 		do {
 
@@ -55,6 +53,9 @@ public class GameProcessor {
 	}
 
 	private void makePlay(Player player) {
+		
+		System.out.println(discardedCards);
+		
 		Card chosenCard = null;
 
 		Card lastCard = CardProcessor.getLastCardDeck(discardedCards);
@@ -73,9 +74,9 @@ public class GameProcessor {
 		player.getCards().remove(chosenCard);
 		PlayerProcessor.discardedCards(chosenCard, discardedCards);
 
-		if(!CardType.NUMBER.equals(chosenCard.getType()))
+		if (!CardType.NUMBER.equals(chosenCard.getType()))
 			cardTypeActions(player, chosenCard);
-		
+
 	}
 
 	private void cardTypeActions(Player player, Card chosenCard) {
@@ -107,10 +108,10 @@ public class GameProcessor {
 			PlayerProcessor.drawCards(player, cards, 7);
 
 		// show a first card
-		do {
+		moveToDiscardedCards(cards.remove(0), discardedCards);
+		
+		while(!discardedCards.getLast().getType().equals(CardType.NUMBER))
 			moveToDiscardedCards(cards.remove(0), discardedCards);
-		} while (!discardedCards.getLast().getType().equals(CardType.NUMBER));
-
 	}
 
 	private void createDeckCards() {
@@ -133,7 +134,7 @@ public class GameProcessor {
 	}
 
 	public static void moveToDiscardedCards(Card card, Deque<Card> discardedCard) {
-		discardedCard.add(card);
+		discardedCard.addFirst(card);
 	}
 
 	public static void clearScreen() {
