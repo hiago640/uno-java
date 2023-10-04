@@ -3,11 +3,15 @@ package br.hiago640.uno.controller;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.DefaultListCellRenderer;
+
 import br.hiago640.uno.model.Card;
+import br.hiago640.uno.model.CardColor;
 import br.hiago640.uno.model.CardType;
 import br.hiago640.uno.model.Player;
 
@@ -18,6 +22,8 @@ public class GameProcessor {
 	private List<Card> cards;
 	private Deque<Card> discardedCards = new ArrayDeque<>();
 	private LinkedList<Player> players = new LinkedList<>();
+	
+	private CardColor tableColor;
 
 	public GameProcessor() {
 		createDeckCards();
@@ -31,10 +37,12 @@ public class GameProcessor {
 
 		boolean isFinished;
 		do {
-
 			System.out.println("Turns: " + players);
 
 			for (Player player : players) {
+				
+				System.out.println("Table color: " + tableColor);
+				
 				if (player.isSkipped()) {
 					System.out.println("Your turn: " + player.getName());
 					System.out.println("Your turn is Skipped!");
@@ -53,9 +61,9 @@ public class GameProcessor {
 	}
 
 	private void makePlay(Player player) {
-		
+
 		System.out.println(discardedCards);
-		
+
 		Card chosenCard = null;
 
 		Card lastCard = CardProcessor.getLastCardDeck(discardedCards);
@@ -74,18 +82,60 @@ public class GameProcessor {
 		player.getCards().remove(chosenCard);
 		PlayerProcessor.discardedCards(chosenCard, discardedCards);
 
+		tableColor = chosenCard.getColor();
+		
 		if (!CardType.NUMBER.equals(chosenCard.getType()))
 			cardTypeActions(player, chosenCard);
 
 	}
 
 	private void cardTypeActions(Player player, Card chosenCard) {
-		if (CardType.SKIP_CARD.equals(chosenCard.getType())) {
-			int idxCurrentPlayer = players.indexOf(player);
-			int idxNextPlayer = (idxCurrentPlayer + 1 > players.size()) ? 0 : idxCurrentPlayer + 1;
 
-			players.get(idxNextPlayer).setSkipped(true);
+		int idxCurrentPlayer = players.indexOf(player);
+		int idxNextPlayer = (idxCurrentPlayer + 1 >= players.size()) ? 0 : idxCurrentPlayer + 1;
+
+		Player nextPlayer = players.get(idxNextPlayer);
+
+		switch (chosenCard.getType()) {
+		case SKIP_CARD: {
+			nextPlayer.setSkipped(true);
+			break;
 		}
+		case WILD_CARD: {
+
+			break;
+		}
+		case DRAW_TWO_CARD: {
+
+			break;
+		}
+		case WILD_DRAW_FOUR_CARD: {
+			nextPlayer.setSkipped(true);
+
+			PlayerProcessor.drawCards(nextPlayer, cards, 4);
+
+			chooseColor();
+			break;
+		}
+		case REVERSE_CARD: {
+
+			break;
+		}
+		default:
+
+		}
+	}
+
+	private void chooseColor() {
+		System.out.println();
+		
+		for (CardColor color : CardColor.values())
+			System.out.println(color.getColor());
+
+		System.out.print("\nChoose a Color: ");
+		int colorIndex = Integer.parseInt(scan.nextLine());
+		
+		tableColor = CardColor.values()[colorIndex - 1];
 	}
 
 	private boolean validCard(Card chosenCard) {
@@ -109,9 +159,13 @@ public class GameProcessor {
 
 		// show a first card
 		moveToDiscardedCards(cards.remove(0), discardedCards);
+
+		while (!discardedCards.getLast().getType().equals(CardType.NUMBER)) {
+			moveToDiscardedCards(cards.remove(0), discardedCards);			
+		}
 		
-		while(!discardedCards.getLast().getType().equals(CardType.NUMBER))
-			moveToDiscardedCards(cards.remove(0), discardedCards);
+		
+		tableColor = discardedCards.getFirst().getColor();
 	}
 
 	private void createDeckCards() {
